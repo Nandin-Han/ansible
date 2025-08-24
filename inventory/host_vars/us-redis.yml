@@ -1,0 +1,16 @@
+---
+# 美国Redis缓存服务器 - us-redis
+server_name: "us-redis-cache"
+ansible_host: "13.57.106.117"
+description: "美国Redis缓存服务器"
+service_role: "cache"
+service_type: "cache"
+service_category: "cache"
+region: "united_states"
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+redis_max_memory: "2gb"
+redis_eviction_policy: "allkeys-lru"
+redis_cluster_enabled: false

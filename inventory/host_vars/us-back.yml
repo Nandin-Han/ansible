@@ -1,0 +1,14 @@
+---
+# 美国后端Web服务器 - us-back
+server_name: "us-backend"
+ansible_host: "50.18.221.19"
+description: "美国后端Web服务器"
+service_role: "backend"
+service_type: "backend"
+service_category: "web"
+region: "united_states"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+api_enabled: true
+rate_limiting_enabled: true

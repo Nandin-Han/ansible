@@ -1,0 +1,16 @@
+---
+# 美国游戏服务器2 - us-game-02
+server_name: "us-game-02"
+ansible_host: "52.8.121.171"
+description: "美国游戏服务器2"
+service_role: "game"
+service_type: "game"
+service_category: "game"
+region: "united_states"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+server_index: 2
+game_server_capacity: 1000
+auto_scaling_enabled: true
+region_priority: "secondary"

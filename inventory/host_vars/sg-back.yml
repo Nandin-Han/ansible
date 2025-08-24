@@ -1,0 +1,13 @@
+---
+# 新加坡后端Web服务器 - sg-back
+server_name: "singapore-backend"
+ansible_host: "172.31.40.104"
+description: "新加坡后端Web服务器"
+service_role: "backend"
+service_type: "backend"
+service_category: "web"
+region: "singapore"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+api_enabled: true

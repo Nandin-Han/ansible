@@ -1,0 +1,15 @@
+---
+# 新加坡Tongits游戏数据库服务器 - sg-tongits
+server_name: "singapore-tongits-db"
+ansible_host: "172.31.40.100"
+description: "新加坡Tongits游戏数据库服务器"
+service_role: "tongits_database"
+service_type: "tongits_database"
+service_category: "database"
+region: "singapore"
+db_type: "tongits"
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+read_only: false

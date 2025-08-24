@@ -1,0 +1,14 @@
+---
+# 新加坡核心服务器1 - sg-core-01
+server_name: "singapore-core-01"
+ansible_host: "172.31.21.117"
+description: "新加坡核心服务器1"
+service_role: "core"
+service_type: "core"
+service_category: "core"
+region: "singapore"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+server_index: 1
+load_balancer_member: true

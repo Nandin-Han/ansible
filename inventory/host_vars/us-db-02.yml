@@ -1,0 +1,18 @@
+---
+# 美国Tongits数据库服务器2 - us-db-02
+server_name: "us-tongits-db-slave"
+ansible_host: "54.153.90.125"
+description: "美国Tongits数据库服务器2"
+service_role: "tongits_database"
+service_type: "tongits_database"
+service_category: "database"
+region: "united_states"
+db_type: "tongits"
+db_role: "slave"
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+read_only: true
+replication_enabled: true
+master_host: "us-db-01"

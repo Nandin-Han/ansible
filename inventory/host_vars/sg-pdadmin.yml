@@ -1,0 +1,15 @@
+---
+# 新加坡管理后台服务器 - sg-pdadmin
+server_name: "singapore-admin"
+ansible_host: "172.31.20.208"
+description: "新加坡管理后台服务器"
+service_role: "admin"
+service_type: "admin"
+service_category: "admin"
+region: "singapore"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+admin_panel_enabled: true
+ssl_enabled: true
+auth_required: true

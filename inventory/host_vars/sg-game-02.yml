@@ -1,0 +1,15 @@
+---
+# 新加坡游戏服务器2 - sg-game-02
+server_name: "singapore-game-02"
+ansible_host: "172.31.24.81"
+description: "新加坡游戏服务器2"
+service_role: "game"
+service_type: "game"
+service_category: "game"
+region: "singapore"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+server_index: 2
+game_server_capacity: 1000
+auto_scaling_enabled: true

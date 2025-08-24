@@ -1,0 +1,19 @@
+---
+# 新加坡Tongits日志数据库主服务器 - sg-tongits_log-mas
+server_name: "singapore-tongits-log-master"
+ansible_host: "172.31.40.105"
+description: "新加坡Tongits日志数据库主服务器"
+service_role: "tongits_log_database"
+service_type: "tongits_log_database"
+service_category: "database"
+region: "singapore"
+db_type: "tongits_log"
+db_role: "master"
+primary_port: 3308
+secondary_port: 3306
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+read_only: false
+replication_enabled: true

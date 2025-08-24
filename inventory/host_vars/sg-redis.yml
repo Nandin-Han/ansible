@@ -1,0 +1,15 @@
+---
+# 新加坡Redis缓存服务器 - sg-redis
+server_name: "singapore-redis-cache"
+ansible_host: "172.31.40.101"
+description: "新加坡Redis缓存服务器"
+service_role: "cache"
+service_type: "cache"
+service_category: "cache"
+region: "singapore"
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+redis_max_memory: "2gb"
+redis_eviction_policy: "allkeys-lru"

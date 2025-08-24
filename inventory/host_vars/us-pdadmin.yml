@@ -1,0 +1,16 @@
+---
+# 美国管理后台服务器 - us-pdadmin
+server_name: "us-admin"
+ansible_host: "54.215.183.210"
+description: "美国管理后台服务器"
+service_role: "admin"
+service_type: "admin"
+service_category: "admin"
+region: "united_states"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+admin_panel_enabled: true
+ssl_enabled: true
+auth_required: true
+geo_restriction_enabled: true

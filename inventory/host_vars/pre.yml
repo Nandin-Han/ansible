@@ -1,0 +1,10 @@
+---
+# 预生产环境服务器 - pre
+server_name: "pre-staging-server"
+ansible_host: "172.31.40.106"
+description: "预生产环境服务器"
+region: "singapore"
+server_type: "infrastructure"
+log_level: "debug"
+monitoring_enabled: true
+backup_required: false

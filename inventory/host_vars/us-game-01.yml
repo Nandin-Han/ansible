@@ -1,0 +1,16 @@
+---
+# 美国游戏服务器1 - us-game-01
+server_name: "us-game-01"
+ansible_host: "54.193.95.19"
+description: "美国游戏服务器1"
+service_role: "game"
+service_type: "game"
+service_category: "game"
+region: "united_states"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+server_index: 1
+game_server_capacity: 1000
+auto_scaling_enabled: true
+region_priority: "primary"

@@ -1,0 +1,15 @@
+---
+# 美国核心服务器1 - us-core-01
+server_name: "us-core-01"
+ansible_host: "13.56.36.236"
+description: "美国核心服务器1"
+service_role: "core"
+service_type: "core"
+service_category: "core"
+region: "united_states"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+server_index: 1
+load_balancer_member: true
+failover_priority: "high"

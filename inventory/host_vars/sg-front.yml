@@ -1,0 +1,13 @@
+---
+# 新加坡前端Web服务器 - sg-front
+server_name: "singapore-frontend"
+ansible_host: "172.31.40.103"
+description: "新加坡前端Web服务器"
+service_role: "frontend"
+service_type: "frontend"
+service_category: "web"
+region: "singapore"
+log_level: "info"
+monitoring_enabled: true
+backup_required: false
+ssl_enabled: true

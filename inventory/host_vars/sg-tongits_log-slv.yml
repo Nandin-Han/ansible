@@ -1,0 +1,18 @@
+---
+# 新加坡Tongits日志数据库从服务器 - sg-tongits_log-slv
+server_name: "singapore-tongits-log-slave"
+ansible_host: "172.31.40.116"
+description: "新加坡Tongits日志数据库从服务器"
+service_role: "tongits_log_database"
+service_type: "tongits_log_database"
+service_category: "database"
+region: "singapore"
+db_type: "tongits_log"
+db_role: "slave"
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+read_only: true
+replication_enabled: true
+master_host: "sg-tongits_log-mas"

@@ -1,0 +1,17 @@
+---
+# 美国Tongits日志数据库服务器1 - us-stardb-01
+server_name: "us-tongits-log-master"
+ansible_host: "52.52.36.197"
+description: "美国Tongits日志数据库服务器1"
+service_role: "tongits_log_database"
+service_type: "tongits_log_database"
+service_category: "database"
+region: "united_states"
+db_type: "tongits_log"
+db_role: "master"
+log_level: "info"
+monitoring_enabled: true
+backup_required: true
+backup_schedule: "daily"
+read_only: false
+replication_enabled: true
