@@ -1,0 +1,12 @@
+{
+    "yaml.schemas": {
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/ansible.json#/$defs/playbook": [
+            "file:///e%3A/Cursor-Edit/ansible/argspec_validation_plays.yml",
+            "file:///e%3A/Cursor-Edit/ansible/linux_playbook.yml",
+            "file:///e%3A/Cursor-Edit/ansible/network_playbook.yml",
+            "file:///e%3A/Cursor-Edit/ansible/game-deploy_playbook.yml"
+        ],
+        "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/role-arg-spec.json": "file:///e%3A/Cursor-Edit/ansible/argspec_validation_plays.meta.yml"
+    },
+    "ansible.python.interpreterPath": "/mnt/e/Cursor-Edit/venv/bin/python3"
+}

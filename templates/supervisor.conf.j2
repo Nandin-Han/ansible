@@ -1,0 +1,15 @@
+[program:{{ supervisor_program_name }}]
+directory = {{ game_server_dir }}/ ; 程序的启动目录
+command = {{ game_server_dir }}/{{ start_file }} -r {{ room_num }} -t 2 ; 启动命令
+autostart = true     ; 在 supervisord 启动的时候也自动启动
+startsecs = 5        ; 启动 5 秒后没有异常退出，就当作已经正常启动了
+autorestart = true   ; 程序异常退出后自动重启
+startretries = 3     ; 启动失败自动重试次数，默认是 3
+user = root          ; 用哪个用户启动
+redirect_stderr = false  ; 把 stderr 重定向到 stdout，默认 false
+stdout_logfile_maxbytes = 100MB  ; stdout 日志文件大小，默认 50MB
+stderr_logfile_maxbytes = 100MB  ;
+stdout_logfile_backups = 180     ; stdout 日志文件备份数;需要注意当指定目录不存在时无法正常启动，
+stderr_logfile_backups = 180     ;
+stdout_logfile = {{ game_server_dir }}/log/{{ supervisor_program_name }}-access.log
+stderr_logfile = {{ game_server_dir }}/log/{{ supervisor_program_name }}-error.log
