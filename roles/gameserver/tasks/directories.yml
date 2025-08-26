@@ -1,0 +1,15 @@
+---
+# 创建必要目录
+
+- name: 创建必要目录
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - "{{ host_svn_game_dir }}"
+    - "{{ host_svn_bin_dir }}"
+    - "{{ gameserver_project_root_dir }}/{{ game_room }}"
+    - "{{ host_gameserver_dir }}"
+    - "{{ host_gameserver_log_dir }}"
+  tags: directories

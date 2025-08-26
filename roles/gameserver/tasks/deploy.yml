@@ -1,0 +1,43 @@
+---
+# 游戏服务器部署任务
+
+- name: 检查现有游戏服务器目录
+  ansible.builtin.stat:
+    path: "{{ host_gameserver_dir }}"
+  register: existing_server
+
+- name: 检查模板目录存在
+  ansible.builtin.stat:
+    path: "{{ host_gameserver_tmp }}"
+  register: template_dir
+  failed_when: not template_dir.stat.exists
+
+- name: 复制模板文件到服务器目录
+  ansible.builtin.shell: |
+    shopt -s dotglob && cp -a "{{ host_gameserver_tmp }}"/* "{{ host_gameserver_dir }}"/
+  args:
+    executable: /bin/bash
+  changed_when: true
+  tags: template
+
+- name: 复制编译产物到服务器目录
+  ansible.builtin.copy:
+    src: "{{ so_file_dir }}/{{ so_file }}"
+    dest: "{{ host_gameserver_dir }}/{{ so_file }}"
+    mode: "0755"
+    remote_src: true
+
+- name: 检查room文件是否存在
+  ansible.builtin.stat:
+    path: "{{ host_gameserver_dir }}/room"
+  register: room_file
+
+- name: 重命名启动文件
+  ansible.builtin.command: mv {{ host_gameserver_dir }}/room {{ host_gameserver_dir }}/{{ start_file }}
+  when: room_file.stat.exists
+  changed_when: true
+
+- name: 设置启动文件权限
+  ansible.builtin.file:
+    path: "{{ host_gameserver_dir }}/{{ start_file }}"
+    mode: "0755"

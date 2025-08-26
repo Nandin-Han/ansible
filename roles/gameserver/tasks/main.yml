@@ -7,7 +7,7 @@
     - vars/gamedir-vars.yml
     - vars/name-vars.yml
     - vars/template-vars.yml
-    - vars/svndin-vars.yml
+    - vars/svndir-vars.yml
     - vars/svnurl-vars.yml
 
 - name: 设置日志和Playbook变量
@@ -29,17 +29,6 @@
 - name: 设置config模板变量
   ansible.builtin.set_fact:
     gameserver_config_tmp: "{{ host_gameserver_config }}"
-
-- name: 验证模板路径设置
-  ansible.builtin.debug:
-    msg: >
-      主机: {{ inventory_hostname }} ({{ ansible_host }})
-      选择的模板路径: {{ game_server_tmp }}
-
-- name: 检查模板路径是否有效
-  ansible.builtin.fail:
-    msg: "未找到的主机对应模板路径配置: {{ inventory_hostname }} 模板路径: {{ game_server_tmp }}"
-  when: game_server_tmp is not defined or game_server_tmp == "EXITED"
 
 - name: 设置其他必要变量
   ansible.builtin.set_fact:

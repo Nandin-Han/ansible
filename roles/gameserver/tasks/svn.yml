@@ -1,0 +1,35 @@
+---
+# SVN操作任务
+
+- name: 检查SVN目录是否存在
+  ansible.builtin.stat:
+    path: "{{ host_svn_game_dir }}/.svn"
+  register: svn_dir
+
+- name: SVN首次检出代码
+  ansible.builtin.subversion:
+    repo: "{{ svn_game_url }}"
+    dest: "{{ host_svn_game_dir }}"
+    checkout: true
+    force: true
+  when: not svn_dir.stat.exists
+  register: svn_checkout
+
+- name: SVN更新代码
+  ansible.builtin.subversion:
+    repo: "{{ svn_game_url }}"
+    dest: "{{ host_svn_game_dir }}"
+    update: true
+  when: svn_dir.stat.exists
+  register: svn_update
+  tags: svn
+
+- name: 检查游戏源码目录是否存在
+  ansible.builtin.stat:
+    path: "{{ host_svn_game_dir }}/{{ game_name }}"
+  register: game_src_dir
+
+- name: 确认游戏源码目录存在
+  ansible.builtin.fail:
+    msg: "未找到游戏源码目录: {{ host_svn_game_dir }}/{{ game_name }}"
+  when: not game_src_dir.stat.exists
