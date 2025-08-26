@@ -1,0 +1,16 @@
+---
+# 系统依赖检查
+
+- name: 检查必需的依赖命令
+  ansible.builtin.command: which {{ item }}
+  register: gameserver_dependency_check
+  failed_when: gameserver_dependency_check.rc != 0
+  changed_when: false
+  loop:
+    - svn
+    - make
+    - sed
+    - awk
+    - grep
+    - supervisorctl
+  tags: dependencies

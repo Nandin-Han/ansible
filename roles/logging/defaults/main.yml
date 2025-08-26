@@ -1,0 +1,8 @@
+---
+# 日志默认配置
+logging_directory: "logs"
+logging_file_mode: "0644"
+logging_directory_mode: "0755"
+logging_level: "NOTICE"
+logging_create_directory: true
+logging_delegate_to_localhost: true

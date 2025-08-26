@@ -1,0 +1,74 @@
+---
+# 游戏服务器部署主任务文件
+
+- name: 加载变量文件
+  ansible.builtin.include_vars: "{{ item }}"
+  loop:
+    - vars/gamedir-vars.yml
+    - vars/name-vars.yml
+    - vars/template-vars.yml
+    - vars/svndin-vars.yml
+    - vars/svnurl-vars.yml
+
+- name: 设置日志和Playbook变量
+  ansible.builtin.set_fact:
+    gameserver_deploy_log_file: "{{ gameserver_deploy_log_file }}"
+    gameserver_update_log_file: "{{ gameserver_update_log_file }}"
+    gameserver_deploy_playbook_name: "{{ gameserver_deploy_playbook_name }}"
+    gameserver_update_playbook_name: "{{ gameserver_update_playbook_name }}"
+
+- name: 创建日志文件
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: touch
+    mode: "0755"
+  loop:
+    - "{{ gameserver_deploy_log_file }}"
+    - "{{ gameserver_update_log_file }}"
+
+- name: 设置config模板变量
+  ansible.builtin.set_fact:
+    gameserver_config_tmp: "{{ host_gameserver_config }}"
+
+- name: 验证模板路径设置
+  ansible.builtin.debug:
+    msg: >
+      主机: {{ inventory_hostname }} ({{ ansible_host }})
+      选择的模板路径: {{ game_server_tmp }}
+
+- name: 检查模板路径是否有效
+  ansible.builtin.fail:
+    msg: "未找到的主机对应模板路径配置: {{ inventory_hostname }} 模板路径: {{ game_server_tmp }}"
+  when: game_server_tmp is not defined or game_server_tmp == "EXITED"
+
+- name: 设置其他必要变量
+  ansible.builtin.set_fact:
+    gameserver_dir: "{{ host_gameserver_dir }}"
+    gameserver_so_file_dir: "{{ host_svn_bin_dir }}"
+
+- name: 参数验证和日志初始化
+  ansible.builtin.include_tasks: validate.yml
+
+- name: 检查系统依赖
+  ansible.builtin.include_tasks: dependencies.yml
+
+- name: 创建必要目录
+  ansible.builtin.include_tasks: directories.yml
+
+- name: 处理SVN操作
+  ansible.builtin.include_tasks: svn.yml
+
+- name: 编译游戏
+  ansible.builtin.include_tasks: compile.yml
+
+- name: 部署游戏服务器
+  ansible.builtin.include_tasks: deploy.yml
+
+- name: 配置游戏服务器
+  ansible.builtin.include_tasks: configure.yml
+
+- name: 配置和启动Supervisor
+  ansible.builtin.include_tasks: supervisor.yml
+
+- name: 记录部署完成和显示结果
+  ansible.builtin.include_tasks: summary.yml

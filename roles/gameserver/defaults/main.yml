@@ -1,0 +1,32 @@
+# 游戏服务器部署默认配置
+---
+# 基础路径配置
+gameserver_project_root_dir: /usr/local/game-server
+gameserver_svn_root_url: https://svn.xaisailaiweef1f.com
+gameserver_project_base_dir: server/tongist
+
+# SVN路径配置
+gameserver_pg_game_path: game/pg
+gameserver_bin_file_path: bin
+gameserver_public_file_path: public
+gameserver_platform_path: platform
+
+# Supervisor配置
+gameserver_supervisor_dir: /etc/supervisord.d
+
+# 模板路径
+gameserver_tmp: Template/game_server-Dir-Template
+
+# 日志路径
+gameserver_deploy_log_file: "ansible/logs/game-deploy.log"
+gameserver_update_log_file: "ansible/logs/game-update.log"
+
+# playbook名称
+gameserver_deploy_playbook_name: "game-deploy.yml"
+gameserver_update_playbook_name: "game-update.yml"
+
+# 编译命令
+gameserver_make_command: "make rebuild"
+
+# 默认启动配置
+gameserver_start_supervisor: false

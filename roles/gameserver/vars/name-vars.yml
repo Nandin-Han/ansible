@@ -1,0 +1,10 @@
+# 文件名变量
+---
+# gameserver启动文件名
+start_file: "room_{{ game_name}}"
+
+# supervisor配置文件名
+supervisor_config_file_name: "{{ room_num }}-{{ game_name }}-{{ game_room }}.conf"
+
+# supervisor进程名
+supervisor_program_name: "{{ room_num }}-{{ game_name }}-{{ game_room }}"

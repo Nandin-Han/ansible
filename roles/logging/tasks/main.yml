@@ -1,0 +1,33 @@
+---
+- name: 创建日志目录
+  ansible.builtin.file:
+    path: "{{ logging_directory }}"
+    state: directory
+    mode: "{{ logging_directory_mode }}"
+  delegate_to: "{{ 'localhost' if logging_delegate_to_localhost else omit }}"
+  when: logging_create_directory
+  tags:
+    - logging
+    - setup
+
+- name: 记录操作开始日志
+  ansible.builtin.lineinfile:
+    path: "{{ logging_file_path }}"
+    line: >
+      [{{ ansible_date_time.iso8601 }}] [{{ logging_playbook_name }}] [{{ logging_level }}] {{ logging_message }} -
+      主机={{ inventory_hostname }}{% if svn_revision is defined %}, SVN版本={{ svn_revision }}{% endif %}
+    create: true
+    mode: "{{ logging_file_mode }}"
+  delegate_to: "{{ 'localhost' if logging_delegate_to_localhost else omit }}"
+  when: logging_message is defined
+  tags:
+    - logging
+
+- name: 显示操作信息
+  ansible.builtin.debug:
+    msg: "{{ logging_debug_message }}"
+  when: logging_debug_message is defined
+  tags:
+    - logging
+    - debug
+    

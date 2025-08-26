@@ -1,0 +1,10 @@
+# 游戏目录变量
+---
+# gameserver目录
+host_gameserver_dir: "{{ gameserver_project_root_dir }}/{{ game_room }}/{{ game_name }}"
+
+# gameserver日志目录
+host_gameserver_log_dir: "{{ host_gameserver_dir }}/log"
+
+# gameserver备份目录
+host_gameserver_backup_dir: "{{ host_gameserver_dir }}/backup"

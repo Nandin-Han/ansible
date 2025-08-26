@@ -1,0 +1,302 @@
+---
+- name: 游戏服务器SO文件热更新
+  hosts: game_servers
+  become: true
+  gather_facts: true
+  vars_files:
+    - vars/game-deploy-vars.yml
+  vars:
+    # 日志配置
+    log_file: "ansible/logs/game-update.log"
+    playbook_name: "game-update"
+  tasks:
+    - name: 创建日志目录
+      ansible.builtin.file:
+        path: "ansible/logs"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+
+    - name: 记录热更新开始日志
+      ansible.builtin.lineinfile:
+        path: "{{ log_file }}"
+        line: >
+          [{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [NOTICE] SO文件热更新开始 -
+          主机={{ inventory_hostname }}, GameName={{ game_name | default('UNDEFINED') }},
+          GameID={{ game_id | default('UNDEFINED') }},
+          RoomNum={{ room_num | default('UNDEFINED') }},
+          GameRoom={{ game_room | default('UNDEFINED') }}
+        create: true
+        mode: "0644"
+      delegate_to: localhost
+    - name: 显示更新开始信息
+      ansible.builtin.debug:
+        msg: |
+          开始SO文件热更新
+          游戏名称: {{ game_name }}
+          服务名: {{ supervisor_program_name }}
+
+    - name: 验证必需参数
+      ansible.builtin.assert:
+        that:
+          - game_name is defined and game_name != ""
+          - game_id is defined and game_id != ""
+          - room_num is defined and room_num != ""
+          - game_room is defined and game_room != ""
+        fail_msg: "必需参数缺失。用法: ansible-playbook update-so-file.yml -e 'game_name=tongits game_id=10001 room_num=1 game_room=room-00001'"
+
+    - name: 验证参数格式
+      ansible.builtin.assert:
+        that:
+          - game_id | regex_search('^[0-9]+$')
+          - room_num | regex_search('^[0-9]+$')
+          - game_name | regex_search('^[a-zA-Z0-9_-]+$')
+          - game_room | regex_search('^[a-zA-Z0-9_-]+$')
+        fail_msg: "参数格式不正确"
+
+    - name: 检查游戏服务器目录是否存在
+      ansible.builtin.stat:
+        path: "{{ game_server_dir }}"
+      register: server_dir
+      failed_when: not server_dir.stat.exists
+
+    - name: 检查当前supervisor服务状态
+      community.general.supervisorctl:
+        name: "{{ supervisor_program_name }}"
+        state: present
+      register: current_status
+      failed_when: false
+      changed_when: false
+
+    - name: 显示当前服务状态
+      ansible.builtin.debug:
+        msg: "当前服务状态: {{ current_status.state | default('未知') }}"
+
+    - name: SVN更新代码
+      ansible.builtin.subversion:
+        repo: "{{ svn_game_pg_url }}"
+        dest: "{{ host_game_pg_dir }}"
+        update: true
+        force: true
+      register: svn_update_result
+
+    - name: 显示SVN更新结果
+      ansible.builtin.debug:
+        msg: "SVN更新完成"
+
+    - name: 检查游戏源码目录
+      ansible.builtin.stat:
+        path: "{{ host_game_pg_dir }}/{{ game_name }}"
+      register: game_src_dir
+      failed_when: not game_src_dir.stat.exists
+
+    - name: 编译游戏
+      block:
+        - name: 执行游戏编译
+          ansible.builtin.command: make rebuild
+          args:
+            chdir: "{{ host_game_pg_dir }}/{{ game_name }}"
+          register: compile_result
+          changed_when: compile_result.rc == 0
+          tags: compile
+
+        - name: 记录编译成功日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [NOTICE] 游戏重新编译成功 - 主机={{ inventory_hostname }}, {{ game_name }}"
+            mode: "0644"
+          delegate_to: localhost
+      rescue:
+        - name: 记录编译失败日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [ERROR] 游戏重新编译失败 - 主机={{ inventory_hostname }}, {{ game_name }}"
+            mode: "0644"
+          delegate_to: localhost
+
+        - name: 终止执行
+          ansible.builtin.fail:
+            msg: "游戏重新编译失败"
+
+    - name: 显示编译结果
+      ansible.builtin.debug:
+        msg: "编译完成"
+
+    - name: 解析makefile获取LIBNAME
+      ansible.builtin.shell: |
+        set -o pipefail
+        grep -i '^LIBNAME' {{ host_game_pg_dir }}/{{ game_name }}/makefile | head -1 | awk -F '=' '{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}'
+      register: so_file_result
+      changed_when: false
+
+    - name: 解析makefile获取SODIR的文件夹
+      ansible.builtin.shell: |
+        set -o pipefail
+        grep -i '^SODIR' {{ host_game_pg_dir }}/{{ game_name }}/makefile | head -1 | awk -F '/' '{print $5}'
+      register: so_folder_result
+      changed_when: false
+
+    - name: 设置产物变量
+      ansible.builtin.set_fact:
+        so_file: "{{ so_file_result.stdout }}"
+        so_file_dist_folder: "{{ so_folder_result.stdout }}"
+        so_file_dir: "{{ host_bin_file_dir }}/{{ so_folder_result.stdout }}"
+
+    - name: 验证新编译的so文件存在
+      ansible.builtin.stat:
+        path: "{{ so_file_dir }}/{{ so_file }}"
+      register: new_compiled_file
+      failed_when: not new_compiled_file.stat.exists
+
+    - name: 显示so文件信息
+      ansible.builtin.debug:
+        msg: |
+          SO文件: {{ so_file }}
+          源路径: {{ so_file_dir }}/{{ so_file }}
+          目标路径: {{ game_server_dir }}/{{ so_file }}
+
+    - name: 创建备份目录
+      ansible.builtin.file:
+        path: "{{ backup_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: 检查现有so文件是否存在
+      ansible.builtin.stat:
+        path: "{{ game_server_dir }}/{{ so_file }}"
+      register: existing_so_file
+
+    - name: 备份现有so文件
+      ansible.builtin.command: >
+        mv "{{ game_server_dir }}/{{ so_file }}" "{{ backup_dir }}/{{ so_file }}.backup.{{ backup_timestamp }}"
+      when: existing_so_file.stat.exists
+      changed_when: true
+
+    - name: 显示备份信息
+      ansible.builtin.debug:
+        msg: |
+          {% if existing_so_file.stat.exists %}
+          旧SO文件已移动到: {{ backup_dir }}/{{ so_file }}.backup.{{ backup_timestamp }}
+          {% else %}
+          未找到现有SO文件，跳过备份
+          {% endif %}
+
+    - name: 停止supervisor服务
+      block:
+        - name: 执行服务停止
+          community.general.supervisorctl:
+            name: "{{ supervisor_program_name }}"
+            state: stopped
+
+        - name: 记录服务停止成功日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [NOTICE] 服务停止成功 - 主机={{ inventory_hostname }}, {{ supervisor_program_name }}"
+            mode: "0644"
+          delegate_to: localhost
+      rescue:
+        - name: 记录服务停止失败日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [WARNING] 服务停止失败或服务未运行 - 主机={{ inventory_hostname }}, {{ supervisor_program_name }}"
+            mode: "0644"
+          delegate_to: localhost
+
+    - name: 等待服务完全停止
+      ansible.builtin.pause:
+        seconds: 3
+
+    - name: 替换so文件
+      block:
+        - name: 复制新编译的SO文件到游戏目录
+          ansible.builtin.copy:
+            src: "{{ so_file_dir }}/{{ so_file }}"
+            dest: "{{ game_server_dir }}/{{ so_file }}"
+            mode: '0755'
+            remote_src: true
+
+        - name: 记录文件替换成功日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [NOTICE] SO文件替换成功 - 主机={{ inventory_hostname }}, {{ so_file }}"
+            mode: "0644"
+          delegate_to: localhost
+      rescue:
+        - name: 记录文件替换失败日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [ERROR] SO文件替换失败 - 主机={{ inventory_hostname }}, {{ so_file }}"
+            mode: "0644"
+          delegate_to: localhost
+
+        - name: 终止执行
+          ansible.builtin.fail:
+            msg: "SO文件替换失败"
+
+    - name: 验证新so文件已替换
+      ansible.builtin.stat:
+        path: "{{ game_server_dir }}/{{ so_file }}"
+      register: replaced_so_file
+      failed_when: not replaced_so_file.stat.exists
+
+    - name: 启动supervisor服务
+      block:
+        - name: 执行服务启动
+          community.general.supervisorctl:
+            name: "{{ supervisor_program_name }}"
+            state: started
+
+        - name: 记录服务启动成功日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [NOTICE] 服务启动成功 - 主机={{ inventory_hostname }}, {{ supervisor_program_name }}"
+            mode: "0644"
+          delegate_to: localhost
+      rescue:
+        - name: 记录服务启动失败日志
+          ansible.builtin.lineinfile:
+            path: "{{ log_file }}"
+            line: "[{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [ERROR] 服务启动失败 - 主机={{ inventory_hostname }}, {{ supervisor_program_name }}"
+            mode: "0644"
+          delegate_to: localhost
+
+        - name: 终止执行
+          ansible.builtin.fail:
+            msg: "服务启动失败"
+
+    - name: 验证服务启动状态
+      ansible.builtin.shell: |
+        set -o pipefail
+        supervisorctl status {{ supervisor_program_name }} | awk '{print $2}'
+      register: initial_status
+      retries: 10
+      delay: 1
+      until: initial_status.stdout == 'RUNNING'
+      failed_when: initial_status.stdout in ['FATAL', 'EXITED', 'STOPPED']
+      changed_when: false
+
+    - name: 显示服务状态
+      ansible.builtin.debug:
+        msg: "服务 {{ supervisor_program_name }} 状态: {{ initial_status.stdout }}"
+
+    - name: 记录热更新完成日志
+      ansible.builtin.lineinfile:
+        path: "{{ log_file }}"
+        line: >
+          [{{ ansible_date_time.iso8601 }}] [{{ playbook_name }}] [NOTICE] SO文件热更新完成 -
+          主机={{ inventory_hostname }}, {{ supervisor_program_name }}, SO文件={{ so_file }},
+          服务状态={{ initial_status.stdout | default('未知') }}
+        mode: "0644"
+      delegate_to: localhost
+
+    - name: 显示更新完成信息
+      ansible.builtin.debug:
+        msg: |
+          ✅ SO文件热更新成功完成！
+          服务名称: {{ supervisor_program_name }}
+          SO文件: {{ so_file }}
+          服务状态: {{ initial_status.stdout | default('未知') }}
+          {% if existing_so_file.stat.exists %}
+          备份文件: {{ backup_dir }}/{{ so_file }}.backup.{{ backup_timestamp }}
+          {% endif %}
+          日志文件: {{ game_server_dir }}/log/

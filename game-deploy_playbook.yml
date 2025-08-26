@@ -9,7 +9,7 @@
 
   vars:
     # 日志配置
-    log_file: "/home/ubuntu/project-workspace/ansible/logs/game-deploy.log"
+    log_file: "ansible/logs/game-deploy.log"
     playbook_name: "game-deploy"
 
     # SVN URLs
@@ -35,7 +35,7 @@
   tasks:
     - name: 创建日志目录
       ansible.builtin.file:
-        path: "/home/ubuntu/project-workspace/ansible/logs"
+        path: "ansible/logs"
         state: directory
         mode: "0755"
       delegate_to: localhost

@@ -1,0 +1,16 @@
+# SVN URL变量
+---
+# SVN URL
+svn_base_url: "{{ gameserver_svn_root_url }}/{{ gameserver_project_base_dir }}"
+
+# SVN游戏URL
+svn_game_url: "{{ svn_base_url }}/{{ gameserver_pg_game_path }}"
+
+# SVN公共URL
+svn_public_url: "{{ svn_base_url }}/{{ gameserver_public_file_path }}"
+
+# SVN平台URL
+svn_platform_url: "{{ svn_base_url }}/{{ gameserver_platform_path }}"
+
+# SVN bin URL
+svn_bin_url: "{{ svn_base_url }}/{{ gameserver_bin_file_path }}"

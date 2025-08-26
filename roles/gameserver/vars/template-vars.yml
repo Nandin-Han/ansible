@@ -1,0 +1,7 @@
+# 服务器变量
+---
+# gameserver模板路径
+host_gameserver_tmp: "{{ gameserver_project_root_dir }}/{{ gameserver_tmp }}"
+
+# supervisor模板
+host_supervisor_config: "supervisor.conf.j2"
