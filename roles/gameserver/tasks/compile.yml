@@ -6,7 +6,7 @@
     - name: 执行游戏编译
       ansible.builtin.command: "{{ gameserver_make_command }}"
       args:
-        chdir: "{{ host_svn_game_dir }}/{{ game_name }}"
+        chdir: "{{ gameserver_svn_game_dir }}/{{ game_name }}"
       register: gameserver_compile_result
       changed_when: gameserver_compile_result.rc == 0
       tags: gameserver_compile
@@ -15,42 +15,62 @@
       ansible.builtin.lineinfile:
         path: "{{ gameserver_deploy_log_file }}"
         line: "[{{ ansible_date_time.iso8601 }}] [{{ gameserver_deploy_playbook_name }}] [NOTICE] 游戏编译成功 - 主机={{ inventory_hostname }}, {{ game_name }}"
-        mode: "0644"
+        mode: "{{ gameserver_file_mode }}"
+        create: true
       delegate_to: localhost
   rescue:
     - name: 记录编译失败日志
       ansible.builtin.lineinfile:
         path: "{{ gameserver_deploy_log_file }}"
         line: "[{{ ansible_date_time.iso8601 }}] [{{ gameserver_deploy_playbook_name }}] [ERROR] 游戏编译失败 - 主机={{ inventory_hostname }}, {{ game_name }}"
-        mode: "0644"
+        mode: "{{ gameserver_file_mode }}"
+        create: true
       delegate_to: localhost
+
+    - name: 显示编译错误详情
+      ansible.builtin.debug:
+        msg: |
+          编译失败详情:
+          返回码: {{ gameserver_compile_result.rc | default('未知') }}
+          标准输出: {{ gameserver_compile_result.stdout | default('无') }}
+          错误输出: {{ gameserver_compile_result.stderr | default('无') }}
 
     - name: 终止执行
       ansible.builtin.fail:
-        msg: "游戏编译失败"
+        msg: "游戏编译失败，请检查源码和编译环境"
 
 - name: 解析makefile获取LIBNAME
   ansible.builtin.shell: |
     set -o pipefail
-    grep -i '^LIBNAME' {{ host_svn_game_dir }}/{{ game_name }}/makefile | head -1 | awk -F '=' '{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}'
+    grep -i '^LIBNAME' {{ gameserver_svn_game_dir }}/{{ game_name }}/makefile | head -1 | awk -F '=' '{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}'
   register: gameserver_so_file_result
   changed_when: false
+  failed_when: gameserver_so_file_result.stdout == ""
 
 - name: 解析makefile获取SODIR的文件夹
   ansible.builtin.shell: |
     set -o pipefail
-    grep -i '^SODIR' {{ host_svn_game_dir }}/{{ game_name }}/makefile | head -1 | awk -F '/' '{print $5}'
+    grep -i '^SODIR' {{ gameserver_svn_game_dir }}/{{ game_name }}/makefile | head -1 | awk -F '/' '{print $5}'
   register: gameserver_so_folder_result
   changed_when: false
+  failed_when: gameserver_so_folder_result.stdout == ""
 
-- name: 设置产物变量
+- name: 设置编译产物变量
   ansible.builtin.set_fact:
     gameserver_so_file: "{{ gameserver_so_file_result.stdout }}"
     gameserver_so_file_dist_folder: "{{ gameserver_so_folder_result.stdout }}"
-    gameserver_so_file_dir: "{{ host_svn_bin_dir }}/{{ gameserver_so_folder_result.stdout }}"
+    gameserver_so_file_dir: "{{ gameserver_svn_bin_dir }}/{{ gameserver_so_folder_result.stdout }}"
 
 - name: 验证编译产物存在
   ansible.builtin.stat:
     path: "{{ gameserver_so_file_dir }}/{{ gameserver_so_file }}"
-  register: gameserver_compiled_file
-  failed_when: not gameserver_compiled_file.stat.exists
+  register: gameserver_compiled_file_stat
+  failed_when: not gameserver_compiled_file_stat.stat.exists
+
+- name: 显示编译产物信息
+  ansible.builtin.debug:
+    msg: |
+      编译完成信息:
+      SO文件: {{ gameserver_so_file }}
+      SO目录: {{ gameserver_so_file_dir }}
+      文件大小: {{ gameserver_compiled_file_stat.stat.size | filesizeformat if gameserver_compiled_file_stat.stat.exists else '未知' }}

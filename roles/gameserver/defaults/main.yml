@@ -13,13 +13,20 @@ gameserver_platform_path: platform
 
 # Supervisor配置
 gameserver_supervisor_dir: /etc/supervisord.d
+gameserver_supervisor_user: root
+gameserver_supervisor_autostart: true
+gameserver_supervisor_autorestart: true
+gameserver_supervisor_startsecs: 5
+gameserver_supervisor_startretries: 3
 
 # 模板路径
 gameserver_tmp: Template/game_server-Dir-Template
 
-# 日志路径
+# 日志配置
 gameserver_deploy_log_file: "ansible/logs/game-deploy.log"
 gameserver_update_log_file: "ansible/logs/game-update.log"
+gameserver_log_max_bytes: 100MB
+gameserver_log_backups: 180
 
 # playbook名称
 gameserver_deploy_playbook_name: "game-deploy.yml"
@@ -30,3 +37,23 @@ gameserver_make_command: "make rebuild"
 
 # 默认启动配置
 gameserver_start_supervisor: false
+
+# 权限配置
+gameserver_file_mode: "0644"
+gameserver_dir_mode: "0755"
+gameserver_exec_mode: "0755"
+
+# 服务配置
+gameserver_service_timeout: 30
+gameserver_service_retries: 3
+
+# 备份配置
+gameserver_backup_enabled: true
+gameserver_backup_count: 5
+
+# 主机组映射配置模板
+gameserver_config_templates:
+  singapore: sg-config.xml.j2
+  us: us-config.xml.j2
+  pre: pre-config.xml.j2
+  default: sg-config.xml.j2

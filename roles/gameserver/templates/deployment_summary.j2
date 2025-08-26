@@ -1,0 +1,33 @@
+游戏服务器部署总结报告
+====================================
+
+部署信息:
+- 主机: {{ deployment_summary.host }}
+- 游戏名称: {{ deployment_summary.game_name }}
+- 游戏ID: {{ deployment_summary.game_id }}
+- 房间号: {{ deployment_summary.room_num }}
+- 游戏房间: {{ deployment_summary.game_room }}
+
+部署路径:
+- 部署目录: {{ deployment_summary.deploy_dir }}
+- SO文件: {{ deployment_summary.so_file }}
+- Supervisor程序: {{ deployment_summary.supervisor_program }}
+
+时间信息:
+- 开始时间: {{ deployment_summary.start_time }}
+- 完成时间: {{ deployment_summary.end_time }}
+- 服务状态: {{ deployment_summary.status }}
+
+常用命令:
+- 查看状态: sudo supervisorctl status {{ deployment_summary.supervisor_program }}
+- 启动服务: sudo supervisorctl start {{ deployment_summary.supervisor_program }}
+- 停止服务: sudo supervisorctl stop {{ deployment_summary.supervisor_program }}
+- 重启服务: sudo supervisorctl restart {{ deployment_summary.supervisor_program }}
+
+日志文件:
+- 访问日志: {{ deployment_summary.deploy_dir }}/log/{{ deployment_summary.supervisor_program }}-access.log
+- 错误日志: {{ deployment_summary.deploy_dir }}/log/{{ deployment_summary.supervisor_program }}-error.log
+
+配置文件:
+- 游戏配置: {{ deployment_summary.deploy_dir }}/config.xml
+- Supervisor配置: /etc/supervisord.d/{{ deployment_summary.supervisor_program }}.conf

@@ -1,0 +1,31 @@
+---
+galaxy_info:
+  author: Game Operations Team
+  description: Deploy and manage game servers with supervisor
+  company: Game Company
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: EL
+      versions:
+        - 7
+        - 8
+        - 9
+    - name: Ubuntu
+      versions:
+        - 18.04
+        - 20.04
+        - 22.04
+  galaxy_tags:
+    - gameserver
+    - supervisor
+    - deployment
+    - svn
+
+dependencies:
+  - role: logging
+    when: gameserver_enable_logging | default(true)
+
+collections:
+  - community.general
+  - ansible.posix

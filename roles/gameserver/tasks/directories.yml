@@ -1,15 +1,19 @@
 ---
 # 创建必要目录
 
-- name: 创建必要目录
+- name: 创建游戏服务器必要目录
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: "0755"
+    mode: "{{ gameserver_dir_mode }}"
+    owner: "{{ gameserver_supervisor_user }}"
+    group: "{{ gameserver_supervisor_user }}"
   loop:
-    - "{{ host_svn_game_dir }}"
-    - "{{ host_svn_bin_dir }}"
+    - "{{ gameserver_svn_game_dir }}"
+    - "{{ gameserver_svn_bin_dir }}"
     - "{{ gameserver_project_root_dir }}/{{ game_room }}"
-    - "{{ host_gameserver_dir }}"
-    - "{{ host_gameserver_log_dir }}"
+    - "{{ gameserver_host_dir }}"
+    - "{{ gameserver_host_log_dir }}"
+    - "{{ gameserver_host_backup_dir if gameserver_backup_enabled else omit }}"
+  when: item is defined
   tags: gameserver_directories

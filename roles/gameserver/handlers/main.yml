@@ -1,0 +1,18 @@
+---
+# Gameserver role handlers
+
+- name: Reload supervisor configuration
+  community.general.supervisorctl:
+    name: all
+    state: present
+  when: ansible_service_mgr == "systemd"
+
+- name: Restart supervisor service
+  ansible.builtin.service:
+    name: supervisord
+    state: restarted
+  when: ansible_service_mgr == "systemd"
+
+- name: Update supervisor programs
+  ansible.builtin.command: supervisorctl update
+  changed_when: true

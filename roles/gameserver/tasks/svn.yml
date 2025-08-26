@@ -3,33 +3,40 @@
 
 - name: 检查SVN目录是否存在
   ansible.builtin.stat:
-    path: "{{ host_svn_game_dir }}/.svn"
-  register: gameserver_svn_dir
+    path: "{{ gameserver_svn_game_dir }}/.svn"
+  register: gameserver_svn_dir_stat
 
 - name: SVN首次检出代码
   ansible.builtin.subversion:
-    repo: "{{ svn_game_url }}"
-    dest: "{{ host_svn_game_dir }}"
+    repo: "{{ gameserver_svn_game_url }}"
+    dest: "{{ gameserver_svn_game_dir }}"
     checkout: true
     force: true
-  when: not gameserver_svn_dir.stat.exists
+  when: not gameserver_svn_dir_stat.stat.exists
   register: gameserver_svn_checkout
+  retries: "{{ gameserver_service_retries }}"
+  delay: 5
+  until: gameserver_svn_checkout is succeeded
+  tags: gameserver_svn
 
 - name: SVN更新代码
   ansible.builtin.subversion:
-    repo: "{{ svn_game_url }}"
-    dest: "{{ host_svn_game_dir }}"
+    repo: "{{ gameserver_svn_game_url }}"
+    dest: "{{ gameserver_svn_game_dir }}"
     update: true
-  when: gameserver_svn_dir.stat.exists
+  when: gameserver_svn_dir_stat.stat.exists
   register: gameserver_svn_update
+  retries: "{{ gameserver_service_retries }}"
+  delay: 5
+  until: gameserver_svn_update is succeeded
   tags: gameserver_svn
 
 - name: 检查游戏源码目录是否存在
   ansible.builtin.stat:
-    path: "{{ host_svn_game_dir }}/{{ game_name }}"
-  register: gameserver_game_src_dir
+    path: "{{ gameserver_svn_game_dir }}/{{ game_name }}"
+  register: gameserver_game_src_dir_stat
 
 - name: 确认游戏源码目录存在
   ansible.builtin.fail:
-    msg: "未找到游戏源码目录: {{ host_svn_game_dir }}/{{ game_name }}"
-  when: not gameserver_game_src_dir.stat.exists
+    msg: "未找到游戏源码目录: {{ gameserver_svn_game_dir }}/{{ game_name }}"
+  when: not gameserver_game_src_dir_stat.stat.exists

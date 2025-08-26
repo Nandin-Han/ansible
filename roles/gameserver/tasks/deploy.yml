@@ -3,18 +3,27 @@
 
 - name: 检查现有游戏服务器目录
   ansible.builtin.stat:
-    path: "{{ host_gameserver_dir }}"
-  register: gameserver_existing_server
+    path: "{{ gameserver_host_dir }}"
+  register: gameserver_existing_server_stat
+
+- name: 备份现有服务器目录
+  ansible.builtin.command: >
+    mv "{{ gameserver_host_dir }}" 
+    "{{ gameserver_host_backup_dir }}/backup-{{ ansible_date_time.epoch }}"
+  when: 
+    - gameserver_backup_enabled
+    - gameserver_existing_server_stat.stat.exists
+  changed_when: true
 
 - name: 检查模板目录存在
   ansible.builtin.stat:
-    path: "{{ host_gameserver_tmp }}"
-  register: gameserver_template_dir
-  failed_when: not gameserver_template_dir.stat.exists
+    path: "{{ gameserver_host_tmp }}"
+  register: gameserver_template_dir_stat
+  failed_when: not gameserver_template_dir_stat.stat.exists
 
 - name: 复制模板文件到服务器目录
   ansible.builtin.shell: |
-    shopt -s dotglob && cp -a "{{ host_gameserver_tmp }}"/* "{{ host_gameserver_dir }}"/
+    shopt -s dotglob && cp -a "{{ gameserver_host_tmp }}"/* "{{ gameserver_host_dir }}"/
   args:
     executable: /bin/bash
   changed_when: true
@@ -23,21 +32,33 @@
 - name: 复制编译产物到服务器目录
   ansible.builtin.copy:
     src: "{{ gameserver_so_file_dir }}/{{ gameserver_so_file }}"
-    dest: "{{ host_gameserver_dir }}/{{ gameserver_so_file }}"
-    mode: "0755"
+    dest: "{{ gameserver_host_dir }}/{{ gameserver_so_file }}"
+    mode: "{{ gameserver_exec_mode }}"
+    owner: "{{ gameserver_supervisor_user }}"
+    group: "{{ gameserver_supervisor_user }}"
     remote_src: true
 
 - name: 检查room文件是否存在
   ansible.builtin.stat:
-    path: "{{ host_gameserver_dir }}/room"
-  register: gameserver_room_file
+    path: "{{ gameserver_host_dir }}/room"
+  register: gameserver_room_file_stat
 
 - name: 重命名启动文件
-  ansible.builtin.command: mv {{ host_gameserver_dir }}/room {{ host_gameserver_dir }}/{{ start_file }}
-  when: gameserver_room_file.stat.exists
+  ansible.builtin.command: mv {{ gameserver_host_dir }}/room {{ gameserver_host_dir }}/{{ gameserver_start_file }}
+  when: gameserver_room_file_stat.stat.exists
   changed_when: true
 
 - name: 设置启动文件权限
   ansible.builtin.file:
-    path: "{{ host_gameserver_dir }}/{{ start_file }}"
-    mode: "0755"
+    path: "{{ gameserver_host_dir }}/{{ gameserver_start_file }}"
+    mode: "{{ gameserver_exec_mode }}"
+    owner: "{{ gameserver_supervisor_user }}"
+    group: "{{ gameserver_supervisor_user }}"
+
+- name: 清理旧备份文件
+  ansible.builtin.shell: |
+    cd "{{ gameserver_host_backup_dir }}" && 
+    ls -t backup-* 2>/dev/null | tail -n +{{ gameserver_backup_count + 1 }} | xargs rm -rf
+  when: gameserver_backup_enabled
+  changed_when: false
+  failed_when: false

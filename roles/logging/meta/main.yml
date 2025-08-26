@@ -1,0 +1,27 @@
+---
+galaxy_info:
+  author: Game Operations Team
+  description: Centralized logging utilities for game server deployment
+  company: Game Company
+  license: MIT
+  min_ansible_version: "2.12"
+  platforms:
+    - name: EL
+      versions:
+        - "7"
+        - "8"
+        - "9"
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+        - jammy
+  galaxy_tags:
+    - logging
+    - utilities
+    - deployment
+
+dependencies: []
+
+collections:
+  - ansible.posix

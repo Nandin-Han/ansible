@@ -3,26 +3,46 @@
 
 - name: 生成config.xml配置文件
   ansible.builtin.template:
-    src: "{{ gameserver_config_tmp }}"
-    dest: "{{ host_gameserver_dir }}/config.xml"
-    mode: "0644"
+    src: "{{ gameserver_config_template }}"
+    dest: "{{ gameserver_host_dir }}/config.xml"
+    mode: "{{ gameserver_file_mode }}"
+    owner: "{{ gameserver_supervisor_user }}"
+    group: "{{ gameserver_supervisor_user }}"
     backup: true
 
 - name: 检查config.xml文件是否存在
   ansible.builtin.stat:
-    path: "{{ host_gameserver_dir }}/config.xml"
-  register: gameserver_config_xml
+    path: "{{ gameserver_host_dir }}/config.xml"
+  register: gameserver_config_xml_stat
 
-- name: 更新config.xml配置
+- name: 更新config.xml中的SO文件名
   ansible.builtin.replace:
-    path: "{{ host_gameserver_dir }}/config.xml"
+    path: "{{ gameserver_host_dir }}/config.xml"
     regexp: 'name=""'
     replace: 'name="{{ gameserver_so_file }}"'
-  when: gameserver_config_xml.stat.exists
+  when: gameserver_config_xml_stat.stat.exists
 
 - name: 更新config.xml中的game_id
   ansible.builtin.replace:
-    path: "{{ host_gameserver_dir }}/config.xml"
+    path: "{{ gameserver_host_dir }}/config.xml"
     regexp: 'game_id=""'
     replace: 'game_id="{{ game_id }}"'
-  when: gameserver_config_xml.stat.exists
+  when: gameserver_config_xml_stat.stat.exists
+
+- name: 验证配置文件语法（如果是XML）
+  ansible.builtin.command: xmllint --noout "{{ gameserver_host_dir }}/config.xml"
+  register: gameserver_xml_validation
+  changed_when: false
+  failed_when: false
+  when: gameserver_config_xml_stat.stat.exists
+
+- name: 显示XML验证结果
+  ansible.builtin.debug:
+    msg: |
+      配置文件验证结果:
+      {% if gameserver_xml_validation.rc == 0 %}
+      ✓ XML语法正确
+      {% else %}
+      ⚠ XML语法可能有问题: {{ gameserver_xml_validation.stderr | default('未知错误') }}
+      {% endif %}
+  when: gameserver_config_xml_stat.stat.exists

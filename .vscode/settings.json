@@ -8,5 +8,5 @@
         ],
         "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/role-arg-spec.json": "file:///e%3A/Cursor-Edit/ansible/argspec_validation_plays.meta.yml"
     },
-    "ansible.python.interpreterPath": "/mnt/e/Cursor-Edit/venv/bin/python3"
+    "ansible.python.interpreterPath": "/Ops/.venv/bin/python"
 }

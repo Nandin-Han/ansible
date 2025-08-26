@@ -6,3 +6,16 @@ logging_directory_mode: "0755"
 logging_level: "NOTICE"
 logging_create_directory: true
 logging_delegate_to_localhost: true
+
+# 日志轮转配置
+logging_max_size: "100MB"
+logging_backup_count: 30
+logging_compress: true
+
+# 日志格式配置
+logging_timestamp_format: "iso8601"
+logging_include_hostname: true
+logging_include_playbook: true
+
+# 日志文件路径配置
+logging_file_path: "{{ logging_directory }}/deployment.log"

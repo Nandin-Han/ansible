@@ -1,5 +1,5 @@
 ---
-- name: 创建日志目录
+- name: Create log directory
   ansible.builtin.file:
     path: "{{ logging_directory }}"
     state: directory
@@ -10,12 +10,15 @@
     - logging
     - setup
 
-- name: 记录操作开始日志
+- name: Log operation message
   ansible.builtin.lineinfile:
     path: "{{ logging_file_path }}"
     line: >
-      [{{ ansible_date_time.iso8601 }}] [{{ logging_playbook_name }}] [{{ logging_level }}] {{ logging_message }} -
-      主机={{ inventory_hostname }}{% if svn_revision is defined %}, SVN版本={{ svn_revision }}{% endif %}
+      [{{ ansible_date_time[logging_timestamp_format] }}]
+      {% if logging_include_playbook and logging_playbook_name is defined %}[{{ logging_playbook_name }}]{% endif %}
+      [{{ logging_level }}] {{ logging_message }}
+      {% if logging_include_hostname %}- 主机={{ inventory_hostname }}{% endif %}
+      {% if svn_revision is defined %}, SVN版本={{ svn_revision }}{% endif %}
     create: true
     mode: "{{ logging_file_mode }}"
   delegate_to: "{{ 'localhost' if logging_delegate_to_localhost else omit }}"
@@ -23,11 +26,48 @@
   tags:
     - logging
 
-- name: 显示操作信息
+- name: Display operation information
   ansible.builtin.debug:
     msg: "{{ logging_debug_message }}"
   when: logging_debug_message is defined
   tags:
     - logging
     - debug
+
+- name: Check log file size for rotation
+  ansible.builtin.stat:
+    path: "{{ logging_file_path }}"
+  register: logging_file_stat
+  delegate_to: "{{ 'localhost' if logging_delegate_to_localhost else omit }}"
+  when: logging_file_path is defined
+  tags:
+    - logging
+    - rotate
+
+- name: Rotate log files when needed
+  ansible.builtin.shell: |
+    set -e
+    log_size_mb=$(({{ logging_file_stat.stat.size | default(0) }} / 1048576))
+    max_size_mb={{ logging_max_size | regex_replace('MB', '') | int }}
+    if [ $log_size_mb -gt $max_size_mb ]; then
+      for i in $(seq {{ logging_backup_count }} -1 1); do
+        if [ -f "{{ logging_file_path }}.${i}" ]; then
+          mv "{{ logging_file_path }}.${i}" "{{ logging_file_path }}.$((i+1))"
+        fi
+      done
+      mv "{{ logging_file_path }}" "{{ logging_file_path }}.1"
+      {% if logging_compress %}
+      gzip "{{ logging_file_path }}.1" 2>/dev/null || true
+      {% endif %}
+    fi
+  delegate_to: "{{ 'localhost' if logging_delegate_to_localhost else omit }}"
+  when:
+    - logging_file_path is defined
+    - logging_backup_count > 0
+    - logging_file_stat.stat.exists | default(false)
+  changed_when: false
+  failed_when: false
+  tags:
+    - logging
+    - rotate
     

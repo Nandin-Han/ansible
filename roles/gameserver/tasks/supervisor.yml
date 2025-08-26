@@ -3,36 +3,64 @@
 
 - name: 创建supervisor配置文件
   ansible.builtin.template:
-    src: "{{ host_supervisor_config }}"
-    dest: "{{ gameserver_supervisor_dir }}/{{ supervisor_config_file_name }}"
-    mode: "0644"
+    src: "{{ gameserver_supervisor_template }}"
+    dest: "{{ gameserver_supervisor_dir }}/{{ gameserver_supervisor_config_file_name }}"
+    mode: "{{ gameserver_file_mode }}"
+    owner: root
+    group: root
+    backup: true
+  notify: reload supervisor
 
 - name: 显示supervisor启动选项
   ansible.builtin.debug:
     msg: |
-      Supervisor配置文件已创建: {{ gameserver_supervisor_dir }}/{{ supervisor_program_name }}.conf
+      Supervisor配置文件已创建: {{ gameserver_supervisor_dir }}/{{ gameserver_supervisor_config_file_name }}
+      程序名称: {{ gameserver_supervisor_program_name }}
       {% if gameserver_start_supervisor | default(false) %}
       即将启动supervisor进程...
       {% else %}
       跳过启动supervisor进程（gameserver_start_supervisor=false）
       {% endif %}
 
-- name: 启动supervisor进程
+- name: 检查supervisor配置语法
+  ansible.builtin.command: supervisorctl avail "{{ gameserver_supervisor_program_name }}"
+  register: gameserver_supervisor_check
+  changed_when: false
+  failed_when: false
+
+- name: 重新加载supervisor配置
   ansible.builtin.command: "{{ item }}"
   loop:
     - supervisorctl reread
     - supervisorctl update
   when: gameserver_start_supervisor | default(false) | bool
   changed_when: true
+  register: gameserver_supervisor_reload
+
+- name: 启动supervisor进程
+  community.general.supervisorctl:
+    name: "{{ gameserver_supervisor_program_name }}"
+    state: started
+  when: gameserver_start_supervisor | default(false) | bool
+  register: gameserver_supervisor_start
 
 - name: 验证服务启动状态
   community.general.supervisorctl:
-    name: "{{ supervisor_program_name }}"
+    name: "{{ gameserver_supervisor_program_name }}"
     state: present
   register: gameserver_final_status
-  retries: 30
+  retries: "{{ gameserver_service_timeout }}"
   delay: 1
   until: gameserver_final_status.state == 'RUNNING'
   failed_when: gameserver_final_status.state in ['FATAL', 'EXITED']
   when: gameserver_start_supervisor | default(false) | bool
   changed_when: false
+
+- name: 显示服务状态信息
+  ansible.builtin.debug:
+    msg: |
+      Supervisor服务状态:
+      程序名称: {{ gameserver_supervisor_program_name }}
+      当前状态: {{ gameserver_final_status.state | default('未启动') }}
+      配置文件: {{ gameserver_supervisor_dir }}/{{ gameserver_supervisor_config_file_name }}
+  when: gameserver_start_supervisor | default(false) | bool

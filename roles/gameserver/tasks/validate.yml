@@ -3,10 +3,11 @@
 
 - name: 创建日志目录
   ansible.builtin.file:
-    path: "ansible/logs"
+    path: "{{ gameserver_deploy_log_file | dirname }}"
     state: directory
-    mode: "0755"
+    mode: "{{ gameserver_dir_mode }}"
   delegate_to: localhost
+  run_once: true
 
 - name: 记录部署开始日志
   ansible.builtin.lineinfile:
@@ -18,7 +19,7 @@
       RoomNum={{ room_num | default('UNDEFINED') }},
       GameRoom={{ game_room | default('UNDEFINED') }}
     create: true
-    mode: "0644"
+    mode: "{{ gameserver_file_mode }}"
   delegate_to: localhost
 
 - name: 验证必需参数
@@ -33,6 +34,20 @@
         fail_msg: "必需参数缺失。用法: ansible-playbook game-deploy.yml -e 'game_name=tongits game_id=10001 room_num=1 game_room=room-00001'"
         success_msg: "参数验证通过: GameName={{ game_name }}, GameID={{ game_id }}, RoomNum={{ room_num }}, Game_Room={{ game_room }}"
 
+    - name: 验证GameID和RoomNum为数字
+      ansible.builtin.assert:
+        that:
+          - game_id | string | regex_search('^[0-9]+$')
+          - room_num | string | regex_search('^[0-9]+$')
+        fail_msg: "GameID和RoomNum必须是数字"
+
+    - name: 验证GameName和Game_Room只包含安全字符
+      ansible.builtin.assert:
+        that:
+          - game_name | regex_search('^[a-zA-Z0-9_-]+$')
+          - game_room | regex_search('^[a-zA-Z0-9_-]+$')
+        fail_msg: "GameName和Game_Room只能包含字母、数字、下划线和连字符"
+
     - name: 记录参数验证成功日志
       ansible.builtin.lineinfile:
         path: "{{ gameserver_deploy_log_file }}"
@@ -40,38 +55,31 @@
           [{{ ansible_date_time.iso8601 }}] [{{ gameserver_deploy_playbook_name }}] [NOTICE] 参数验证通过 -
           主机={{ inventory_hostname }}, GameName={{ game_name }}, GameID={{ game_id }},
           RoomNum={{ room_num }}, GameRoom={{ game_room }}
-        mode: "0644"
+        mode: "{{ gameserver_file_mode }}"
       delegate_to: localhost
   rescue:
     - name: 记录参数验证失败日志
       ansible.builtin.lineinfile:
         path: "{{ gameserver_deploy_log_file }}"
         line: "[{{ ansible_date_time.iso8601 }}] [{{ gameserver_deploy_playbook_name }}] [ERROR] 参数验证失败 - 主机={{ inventory_hostname }}, 必需参数缺失或格式错误"
-        mode: "0644"
+        mode: "{{ gameserver_file_mode }}"
+        create: true
       delegate_to: localhost
 
     - name: 终止执行
       ansible.builtin.fail:
         msg: "必需参数缺失。用法: ansible-playbook game-deploy.yml -e 'game_name=tongits game_id=10001 room_num=1 game_room=room-00001'"
 
-- name: 验证GameID和RoomNum为数字
-  ansible.builtin.assert:
-    that:
-      - game_id | regex_search('^[0-9]+$')
-      - room_num | regex_search('^[0-9]+$')
-    fail_msg: "GameID和RoomNum必须是数字"
-
-- name: 验证GameName和Game_Room只包含安全字符
-  ansible.builtin.assert:
-    that:
-      - game_name | regex_search('^[a-zA-Z0-9_-]+$')
-      - game_room | regex_search('^[a-zA-Z0-9_-]+$')
-    fail_msg: "GameName和Game_Room只能包含字母、数字、下划线和连字符"
-
-- name: 设置config模板变量
-  ansible.builtin.set_fact:
-    gameserver_config_tmp: "{{ host_gameserver_config }}"
-
-- name: 设置其他必要变量
-  ansible.builtin.set_fact:
-    gameserver_dir: "{{ host_gameserver_dir }}"
+- name: 显示部署配置信息
+  ansible.builtin.debug:
+    msg: |
+      ==================== 部署配置 ====================
+      游戏名称: {{ game_name }}
+      游戏ID: {{ game_id }}
+      房间号: {{ room_num }}
+      游戏房间: {{ game_room }}
+      部署目录: {{ gameserver_host_dir }}
+      SVN源码目录: {{ gameserver_svn_game_dir }}
+      配置模板: {{ gameserver_config_template }}
+      自动启动: {{ gameserver_start_supervisor | default(false) }}
+      ================================================

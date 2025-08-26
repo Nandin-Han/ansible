@@ -1,0 +1,39 @@
+# 游戏服务器变量统一配置
+---
+# 计算变量 - SVN目录
+gameserver_svn_base_dir: "{{ gameserver_project_root_dir }}/{{ gameserver_project_base_dir }}"
+gameserver_svn_game_dir: "{{ gameserver_svn_base_dir }}/{{ gameserver_pg_game_path }}"
+gameserver_svn_public_dir: "{{ gameserver_svn_base_dir }}/{{ gameserver_public_file_path }}"
+gameserver_svn_platform_dir: "{{ gameserver_svn_base_dir }}/{{ gameserver_platform_path }}"
+gameserver_svn_bin_dir: "{{ gameserver_svn_base_dir }}/{{ gameserver_bin_file_path }}"
+
+# 计算变量 - SVN URLs
+gameserver_svn_base_url: "{{ gameserver_svn_root_url }}/{{ gameserver_project_base_dir }}"
+gameserver_svn_game_url: "{{ gameserver_svn_base_url }}/{{ gameserver_pg_game_path }}"
+gameserver_svn_public_url: "{{ gameserver_svn_base_url }}/{{ gameserver_public_file_path }}"
+gameserver_svn_platform_url: "{{ gameserver_svn_base_url }}/{{ gameserver_platform_path }}"
+gameserver_svn_bin_url: "{{ gameserver_svn_base_url }}/{{ gameserver_bin_file_path }}"
+
+# 计算变量 - 游戏服务器目录
+gameserver_host_dir: "{{ gameserver_project_root_dir }}/{{ game_room }}/{{ game_name }}"
+gameserver_host_log_dir: "{{ gameserver_host_dir }}/log"
+gameserver_host_backup_dir: "{{ gameserver_host_dir }}/backup"
+gameserver_host_tmp: "{{ gameserver_project_root_dir }}/{{ gameserver_tmp }}"
+
+# 计算变量 - 文件名
+gameserver_start_file: "room_{{ game_name }}"
+gameserver_supervisor_config_file_name: "{{ room_num }}-{{ game_name }}-{{ game_room }}.conf"
+gameserver_supervisor_program_name: "{{ room_num }}-{{ game_name }}-{{ game_room }}"
+
+# 计算变量 - 模板配置
+gameserver_supervisor_template: "supervisor.conf.j2"
+gameserver_config_template: >-
+  {%- set region = 'default' -%}
+  {%- if inventory_hostname.startswith('sg-') -%}
+    {%- set region = 'singapore' -%}
+  {%- elif inventory_hostname.startswith('us-') -%}
+    {%- set region = 'us' -%}
+  {%- elif inventory_hostname.startswith('pre-') -%}
+    {%- set region = 'pre' -%}
+  {%- endif -%}
+  {{ gameserver_config_templates[region] }}

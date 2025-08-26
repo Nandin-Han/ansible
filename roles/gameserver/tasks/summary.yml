@@ -6,8 +6,8 @@
     path: "{{ gameserver_deploy_log_file }}"
     line: >
       [{{ ansible_date_time.iso8601 }}] [{{ gameserver_deploy_playbook_name }}] [NOTICE] 游戏服务器部署完成 -
-      主机={{ inventory_hostname }}, {{ supervisor_program_name }}, 启动状态={{ gameserver_start_supervisor | default(false) }}
-    mode: "0644"
+      主机={{ inventory_hostname }}, {{ gameserver_supervisor_program_name }}, 启动状态={{ gameserver_start_supervisor | default(false) }}
+    mode: "{{ gameserver_file_mode }}"
   delegate_to: localhost
 
 - name: 显示部署结果
@@ -19,27 +19,31 @@
       游戏ID: {{ game_id }}
       房间号: {{ room_num }}
       游戏房间: {{ game_room }}
-      服务名称: {{ supervisor_program_name }}
-      部署目录: {{ host_gameserver_dir }}
+      服务名称: {{ gameserver_supervisor_program_name }}
+      部署目录: {{ gameserver_host_dir }}
       编译产物: {{ gameserver_so_file }}
-      模板路径: {{ host_gameserver_tmp }}
+      模板路径: {{ gameserver_host_tmp }}
+      配置模板: {{ gameserver_config_template }}
+      部署开始时间: {{ gameserver_deploy_start_time }}
+      部署完成时间: {{ ansible_date_time.iso8601 }}
       {% if gameserver_start_supervisor | default(false) %}
       ==================== 服务状态 ====================
       服务状态: {{ gameserver_final_status.state | default('未知') }}
-      日志位置: {{ host_gameserver_dir }}/log/
-      访问日志: {{ host_gameserver_dir }}/log/{{ supervisor_program_name }}-access.log
-      错误日志: {{ host_gameserver_dir }}/log/{{ supervisor_program_name }}-error.log
-      
+      PID文件: {{ gameserver_supervisor_dir }}/{{ gameserver_supervisor_config_file_name }}
+      日志位置: {{ gameserver_host_log_dir }}/
+      访问日志: {{ gameserver_host_log_dir }}/{{ gameserver_supervisor_program_name }}-access.log
+      错误日志: {{ gameserver_host_log_dir }}/{{ gameserver_supervisor_program_name }}-error.log
+
       手动管理命令:
-      启动服务: sudo supervisorctl start {{ supervisor_program_name }}
-      停止服务: sudo supervisorctl stop {{ supervisor_program_name }}
-      重启服务: sudo supervisorctl restart {{ supervisor_program_name }}
-      查看状态: sudo supervisorctl status {{ supervisor_program_name }}
+      启动服务: sudo supervisorctl start {{ gameserver_supervisor_program_name }}
+      停止服务: sudo supervisorctl stop {{ gameserver_supervisor_program_name }}
+      重启服务: sudo supervisorctl restart {{ gameserver_supervisor_program_name }}
+      查看状态: sudo supervisorctl status {{ gameserver_supervisor_program_name }}
       {% else %}
       ==================== 手动启动 ====================
       Supervisor进程未自动启动，如需启动请手动执行：
       sudo supervisorctl reread && sudo supervisorctl update
-      sudo supervisorctl start {{ supervisor_program_name }}
+      sudo supervisorctl start {{ gameserver_supervisor_program_name }}
       {% endif %}
       ================================================
 
@@ -47,7 +51,28 @@
   ansible.builtin.debug:
     msg: |
       快速访问命令:
-      查看服务状态: sudo supervisorctl status {{ supervisor_program_name }}
-      查看实时日志: tail -f {{ host_gameserver_dir }}/log/{{ supervisor_program_name }}-access.log
-      查看错误日志: tail -f {{ host_gameserver_dir }}/log/{{ supervisor_program_name }}-error.log
-      进入部署目录: cd {{ host_gameserver_dir }}
+      查看服务状态: sudo supervisorctl status {{ gameserver_supervisor_program_name }}
+      查看实时日志: tail -f {{ gameserver_host_log_dir }}/{{ gameserver_supervisor_program_name }}-access.log
+      查看错误日志: tail -f {{ gameserver_host_log_dir }}/{{ gameserver_supervisor_program_name }}-error.log
+      进入部署目录: cd {{ gameserver_host_dir }}
+      查看配置文件: cat {{ gameserver_host_dir }}/config.xml
+
+- name: 生成部署总结报告
+  ansible.builtin.template:
+    src: deployment_summary.j2
+    dest: "{{ gameserver_deploy_log_file | dirname }}/{{ inventory_hostname }}-{{ game_name }}-{{ ansible_date_time.date }}-summary.txt"
+    mode: "{{ gameserver_file_mode }}"
+  delegate_to: localhost
+  vars:
+    deployment_summary:
+      host: "{{ inventory_hostname }}"
+      game_name: "{{ game_name }}"
+      game_id: "{{ game_id }}"
+      room_num: "{{ room_num }}"
+      game_room: "{{ game_room }}"
+      deploy_dir: "{{ gameserver_host_dir }}"
+      so_file: "{{ gameserver_so_file }}"
+      supervisor_program: "{{ gameserver_supervisor_program_name }}"
+      start_time: "{{ gameserver_deploy_start_time }}"
+      end_time: "{{ ansible_date_time.iso8601 }}"
+      status: "{{ gameserver_final_status.state | default('未启动') }}"
