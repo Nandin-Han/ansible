@@ -13,4 +13,4 @@
     - awk
     - grep
     - supervisorctl
-  tags: dependencies
+  tags: gameserver_dependencies

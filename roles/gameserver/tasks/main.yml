@@ -26,15 +26,6 @@
     - "{{ gameserver_deploy_log_file }}"
     - "{{ gameserver_update_log_file }}"
 
-- name: 设置config模板变量
-  ansible.builtin.set_fact:
-    gameserver_config_tmp: "{{ host_gameserver_config }}"
-
-- name: 设置其他必要变量
-  ansible.builtin.set_fact:
-    gameserver_dir: "{{ host_gameserver_dir }}"
-    gameserver_so_file_dir: "{{ host_svn_bin_dir }}"
-
 - name: 参数验证和日志初始化
   ansible.builtin.include_tasks: validate.yml
 

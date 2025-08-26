@@ -5,3 +5,11 @@ host_gameserver_tmp: "{{ gameserver_project_root_dir }}/{{ gameserver_tmp }}"
 
 # supervisor模板
 host_supervisor_config: "supervisor.conf.j2"
+
+# config模板路径映射
+host_gameserver_config: >-
+  {%- if inventory_hostname in ['sg-01', 'sg-02', 'sg-03'] -%}
+  sg-config.xml.j2{%- elif inventory_hostname in ['us-01', 'us-02'] -%}
+  us-config.xml.j2{%- elif inventory_hostname == 'pre-release-server' -%}
+  pre-config.xml.j2{%- else -%}
+  sg-config.xml.j2{%- endif -%}

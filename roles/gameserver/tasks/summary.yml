@@ -21,11 +21,11 @@
       游戏房间: {{ game_room }}
       服务名称: {{ supervisor_program_name }}
       部署目录: {{ host_gameserver_dir }}
-      编译产物: {{ so_file }}
-      模板路径: {{ game_server_tmp }}
+      编译产物: {{ gameserver_so_file }}
+      模板路径: {{ host_gameserver_tmp }}
       {% if gameserver_start_supervisor | default(false) %}
       ==================== 服务状态 ====================
-      服务状态: {{ final_status.state | default('未知') }}
+      服务状态: {{ gameserver_final_status.state | default('未知') }}
       日志位置: {{ host_gameserver_dir }}/log/
       访问日志: {{ host_gameserver_dir }}/log/{{ supervisor_program_name }}-access.log
       错误日志: {{ host_gameserver_dir }}/log/{{ supervisor_program_name }}-error.log

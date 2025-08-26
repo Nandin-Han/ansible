@@ -12,4 +12,4 @@
     - "{{ gameserver_project_root_dir }}/{{ game_room }}"
     - "{{ host_gameserver_dir }}"
     - "{{ host_gameserver_log_dir }}"
-  tags: directories
+  tags: gameserver_directories

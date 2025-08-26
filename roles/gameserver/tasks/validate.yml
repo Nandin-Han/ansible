@@ -75,4 +75,3 @@
 - name: 设置其他必要变量
   ansible.builtin.set_fact:
     gameserver_dir: "{{ host_gameserver_dir }}"
-    gameserver_so_file_dir: "{{ host_svn_bin_dir }}"

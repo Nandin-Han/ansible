@@ -4,13 +4,13 @@
 - name: 检查现有游戏服务器目录
   ansible.builtin.stat:
     path: "{{ host_gameserver_dir }}"
-  register: existing_server
+  register: gameserver_existing_server
 
 - name: 检查模板目录存在
   ansible.builtin.stat:
     path: "{{ host_gameserver_tmp }}"
-  register: template_dir
-  failed_when: not template_dir.stat.exists
+  register: gameserver_template_dir
+  failed_when: not gameserver_template_dir.stat.exists
 
 - name: 复制模板文件到服务器目录
   ansible.builtin.shell: |
@@ -18,23 +18,23 @@
   args:
     executable: /bin/bash
   changed_when: true
-  tags: template
+  tags: gameserver_template
 
 - name: 复制编译产物到服务器目录
   ansible.builtin.copy:
-    src: "{{ so_file_dir }}/{{ so_file }}"
-    dest: "{{ host_gameserver_dir }}/{{ so_file }}"
+    src: "{{ gameserver_so_file_dir }}/{{ gameserver_so_file }}"
+    dest: "{{ host_gameserver_dir }}/{{ gameserver_so_file }}"
     mode: "0755"
     remote_src: true
 
 - name: 检查room文件是否存在
   ansible.builtin.stat:
     path: "{{ host_gameserver_dir }}/room"
-  register: room_file
+  register: gameserver_room_file
 
 - name: 重命名启动文件
   ansible.builtin.command: mv {{ host_gameserver_dir }}/room {{ host_gameserver_dir }}/{{ start_file }}
-  when: room_file.stat.exists
+  when: gameserver_room_file.stat.exists
   changed_when: true
 
 - name: 设置启动文件权限

@@ -29,10 +29,10 @@
   community.general.supervisorctl:
     name: "{{ supervisor_program_name }}"
     state: present
-  register: final_status
+  register: gameserver_final_status
   retries: 30
   delay: 1
-  until: final_status.state == 'RUNNING'
-  failed_when: final_status.state in ['FATAL', 'EXITED']
+  until: gameserver_final_status.state == 'RUNNING'
+  failed_when: gameserver_final_status.state in ['FATAL', 'EXITED']
   when: gameserver_start_supervisor | default(false) | bool
   changed_when: false

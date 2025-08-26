@@ -7,9 +7,9 @@
       ansible.builtin.command: "{{ gameserver_make_command }}"
       args:
         chdir: "{{ host_svn_game_dir }}/{{ game_name }}"
-      register: compile_result
-      changed_when: compile_result.rc == 0
-      tags: compile
+      register: gameserver_compile_result
+      changed_when: gameserver_compile_result.rc == 0
+      tags: gameserver_compile
 
     - name: 记录编译成功日志
       ansible.builtin.lineinfile:
@@ -33,25 +33,24 @@
   ansible.builtin.shell: |
     set -o pipefail
     grep -i '^LIBNAME' {{ host_svn_game_dir }}/{{ game_name }}/makefile | head -1 | awk -F '=' '{gsub(/^[ \t]+|[ \t]+$/,"",$2); print $2}'
-  register: so_file_result
+  register: gameserver_so_file_result
   changed_when: false
 
 - name: 解析makefile获取SODIR的文件夹
   ansible.builtin.shell: |
     set -o pipefail
     grep -i '^SODIR' {{ host_svn_game_dir }}/{{ game_name }}/makefile | head -1 | awk -F '/' '{print $5}'
-  register: so_folder_result
+  register: gameserver_so_folder_result
   changed_when: false
 
 - name: 设置产物变量
   ansible.builtin.set_fact:
-    so_file: "{{ so_file_result.stdout }}"
-    so_file_dist_folder: "{{ so_folder_result.stdout }}"
-    so_file_dir: "{{ host_svn_bin_dir }}/{{ so_folder_result.stdout }}"
+    gameserver_so_file: "{{ gameserver_so_file_result.stdout }}"
+    gameserver_so_file_dist_folder: "{{ gameserver_so_folder_result.stdout }}"
+    gameserver_so_file_dir: "{{ host_svn_bin_dir }}/{{ gameserver_so_folder_result.stdout }}"
 
 - name: 验证编译产物存在
   ansible.builtin.stat:
-    path: "{{ so_file_dir }}/{{ so_file }}"
-  register: compiled_file
-  failed_when: not compiled_file.stat.exists
-  
+    path: "{{ gameserver_so_file_dir }}/{{ gameserver_so_file }}"
+  register: gameserver_compiled_file
+  failed_when: not gameserver_compiled_file.stat.exists

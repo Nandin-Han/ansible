@@ -1,21 +1,28 @@
 ---
 # 游戏服务器配置任务
 
+- name: 生成config.xml配置文件
+  ansible.builtin.template:
+    src: "{{ gameserver_config_tmp }}"
+    dest: "{{ host_gameserver_dir }}/config.xml"
+    mode: "0644"
+    backup: true
+
 - name: 检查config.xml文件是否存在
   ansible.builtin.stat:
     path: "{{ host_gameserver_dir }}/config.xml"
-  register: config_xml
+  register: gameserver_config_xml
 
 - name: 更新config.xml配置
   ansible.builtin.replace:
     path: "{{ host_gameserver_dir }}/config.xml"
     regexp: 'name=""'
-    replace: 'name="{{ so_file }}"'
-  when: config_xml.stat.exists
+    replace: 'name="{{ gameserver_so_file }}"'
+  when: gameserver_config_xml.stat.exists
 
 - name: 更新config.xml中的game_id
   ansible.builtin.replace:
     path: "{{ host_gameserver_dir }}/config.xml"
     regexp: 'game_id=""'
     replace: 'game_id="{{ game_id }}"'
-  when: config_xml.stat.exists
+  when: gameserver_config_xml.stat.exists
