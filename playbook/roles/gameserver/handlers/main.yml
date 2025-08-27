@@ -1,0 +1,9 @@
+---
+# Gameserver role handlers
+
+- name: Refresh supervisor gameserver config
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - supervisorctl reread
+    - supervisorctl update
+  changed_when: true

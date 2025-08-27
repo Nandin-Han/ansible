@@ -9,7 +9,7 @@
     owner: root
     group: root
     backup: true
-  notify: reload supervisor
+
 
 - name: 显示supervisor启动选项
   ansible.builtin.debug:
@@ -21,12 +21,6 @@
       {% else %}
       跳过启动supervisor进程（gameserver_start_supervisor=false）
       {% endif %}
-
-- name: 检查supervisor配置语法
-  ansible.builtin.command: supervisorctl avail "{{ gameserver_supervisor_program_name }}"
-  register: gameserver_supervisor_check
-  changed_when: false
-  failed_when: false
 
 - name: 重新加载supervisor配置
   ansible.builtin.command: "{{ item }}"

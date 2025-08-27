@@ -1,0 +1,64 @@
+---
+# SVN操作任务
+
+- name: 检查SVN目录是否存在
+  ansible.builtin.stat:
+    path: "{{ gameserver_svn_base_dir }}/.svn"
+  register: gameserver_svn_dir_stat
+
+- name: SVN首次检出代码
+  ansible.builtin.subversion:
+    repo: "{{ gameserver_svn_base_url }}"
+    dest: "{{ gameserver_svn_base_dir }}"
+    checkout: true
+    force: true
+  when: not gameserver_svn_dir_stat.stat.exists
+  register: gameserver_svn_checkout
+  retries: "{{ gameserver_service_retries }}"
+  delay: 5
+  until: gameserver_svn_checkout is succeeded
+  tags: gameserver_svn
+
+- name: SVN PUBLIC更新代码
+  ansible.builtin.subversion:
+    repo: "{{ gameserver_svn_public_url }}"
+    dest: "{{ gameserver_svn_public_dir }}"
+    update: true
+  when: gameserver_svn_dir_stat.stat.exists
+  register: gameserver_svn_update
+  retries: "{{ gameserver_service_retries }}"
+  delay: 5
+  until: gameserver_svn_update is succeeded
+  tags: gameserver_public-svn
+
+- name: SVN PLATFORM更新代码
+  ansible.builtin.subversion:
+    repo: "{{ gameserver_svn_platform_url }}"
+    dest: "{{ gameserver_svn_platform_dir }}"
+    update: true
+  when: gameserver_svn_dir_stat.stat.exists
+  register: gameserver_svn_update
+  retries: "{{ gameserver_service_retries }}"
+  delay: 5
+  until: gameserver_svn_update is succeeded
+  tags: gameserver_platform-svn
+
+- name: 检查PUBLIC源码目录是否存在
+  ansible.builtin.stat:
+    path: "{{ gameserver_svn_public_dir }}"
+  register: gameserver_public_src_dir_stat
+
+- name: 确认PUBLIC源码目录存在
+  ansible.builtin.fail:
+    msg: "未找到游戏源码目录: {{ gameserver_svn_public_dir }}"
+  when: not gameserver_public_src_dir_stat.stat.exists
+
+- name: 检查PLATFORM源码目录是否存在
+  ansible.builtin.stat:
+    path: "{{ gameserver_svn_platform_dir }}"
+  register: gameserver_platform_src_dir_stat
+
+- name: 确认PLATFORM源码目录存在
+  ansible.builtin.fail:
+    msg: "未找到游戏源码目录: {{ gameserver_svn_platform_dir }}"
+  when: not gameserver_platform_src_dir_stat.stat.exists

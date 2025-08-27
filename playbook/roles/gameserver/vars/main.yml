@@ -33,7 +33,7 @@ gameserver_config_template: >-
     {%- set region = 'singapore' -%}
   {%- elif inventory_hostname.startswith('us-') -%}
     {%- set region = 'us' -%}
-  {%- elif inventory_hostname.startswith('pre-') -%}
+  {%- elif inventory_hostname.startswith('pre') -%}
     {%- set region = 'pre' -%}
   {%- endif -%}
   {{ gameserver_config_templates[region] }}

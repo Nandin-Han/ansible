@@ -8,9 +8,9 @@ galaxy_info:
   platforms:
     - name: EL
       versions:
-        - 7
-        - 8
-        - 9
+        - "7"      # 支持所有 EL 7.x 版本 (包括 CentOS 7.9)
+        - "8"      # 支持 EL 8.x 版本
+        - "9"      # 支持 EL 9.x 版本
     - name: Ubuntu
       versions:
         - 18.04

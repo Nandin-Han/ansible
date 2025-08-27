@@ -41,3 +41,9 @@
 - name: 记录部署完成和显示结果
   ansible.builtin.include_tasks: summary.yml
   tags: summary
+
+- name: SVN 更新任务
+  ansible.builtin.include_tasks: svn-update.yml
+  tags: 
+    - gameserver_svn
+    - svn_update

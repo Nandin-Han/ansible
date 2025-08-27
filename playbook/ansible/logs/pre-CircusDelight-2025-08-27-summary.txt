@@ -1,0 +1,33 @@
+游戏服务器部署总结报告
+====================================
+
+部署信息:
+- 主机: pre
+- 游戏名称: CircusDelight
+- 游戏ID: 80
+- 房间号: 16200
+- 游戏房间: room-00001
+
+部署路径:
+- 部署目录: /usr/local/game-server/room-00001/CircusDelight
+- SO文件: CircusDelight.so
+- Supervisor程序: 16200-CircusDelight-room-00001
+
+时间信息:
+- 开始时间: 2025-08-26T21:13:05Z
+- 完成时间: 2025-08-26T21:13:05Z
+- 服务状态: 未启动
+
+常用命令:
+- 查看状态: sudo supervisorctl status 16200-CircusDelight-room-00001
+- 启动服务: sudo supervisorctl start 16200-CircusDelight-room-00001
+- 停止服务: sudo supervisorctl stop 16200-CircusDelight-room-00001
+- 重启服务: sudo supervisorctl restart 16200-CircusDelight-room-00001
+
+日志文件:
+- 访问日志: /usr/local/game-server/room-00001/CircusDelight/log/16200-CircusDelight-room-00001-access.log
+- 错误日志: /usr/local/game-server/room-00001/CircusDelight/log/16200-CircusDelight-room-00001-error.log
+
+配置文件:
+- 游戏配置: /usr/local/game-server/room-00001/CircusDelight/config.xml
+- Supervisor配置: /etc/supervisord.d/16200-CircusDelight-room-00001.conf

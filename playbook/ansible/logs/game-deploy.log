@@ -1,0 +1,33 @@
+[2025-08-26T20:59:25Z] [game-deploy.yml] [NOTICE] 游戏服务器部署开始 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T20:59:25Z] [game-deploy.yml] [NOTICE] 参数验证通过 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:00:30Z] [game-deploy.yml] [NOTICE] 游戏服务器部署开始 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:00:30Z] [game-deploy.yml] [NOTICE] 参数验证通过 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:00:30Z] [game-deploy.yml] [NOTICE] 游戏编译成功 - 主机=pre, CircusDelight
+[2025-08-26T21:03:10Z] [game-deploy.yml] [NOTICE] 游戏服务器部署开始 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:03:10Z] [game-deploy.yml] [NOTICE] 参数验证通过 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:03:10Z] [game-deploy.yml] [NOTICE] 游戏编译成功 - 主机=pre, CircusDelight
+[2025-08-26T21:06:21Z] [game-deploy.yml] [NOTICE] 游戏服务器部署开始 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:06:21Z] [game-deploy.yml] [NOTICE] 参数验证通过 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:06:21Z] [game-deploy.yml] [NOTICE] 游戏编译成功 - 主机=pre, CircusDelight
+[2025-08-26T21:08:42Z] [game-deploy.yml] [NOTICE] 游戏服务器部署开始 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:08:42Z] [game-deploy.yml] [NOTICE] 参数验证通过 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:08:42Z] [game-deploy.yml] [NOTICE] 游戏编译成功 - 主机=pre, CircusDelight
+[2025-08-26T21:08:42Z] [game-deploy.yml] [NOTICE] 游戏服务器部署完成 - 主机=pre, 16200-CircusDelight-room-00001, 启动状态=False
+
+[2025-08-26T21:13:05Z] [game-deploy.yml] [NOTICE] 游戏服务器部署开始 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:13:05Z] [game-deploy.yml] [NOTICE] 参数验证通过 - 主机=pre, GameName=CircusDelight, GameID=80, RoomNum=16200, GameRoom=room-00001
+
+[2025-08-26T21:13:05Z] [game-deploy.yml] [NOTICE] 游戏编译成功 - 主机=pre, CircusDelight
+[2025-08-26T21:13:05Z] [game-deploy.yml] [NOTICE] 游戏服务器部署完成 - 主机=pre, 16200-CircusDelight-room-00001, 启动状态=False
+

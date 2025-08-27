@@ -1,0 +1,59 @@
+---
+- name: 部署游戏服务器
+  hosts: gameservers
+  become: true
+  gather_facts: true
+
+  vars:
+    # 必需的运行时变量（通过 -e 参数传入）
+    # game_name: "tongits"      # 游戏名称
+    # game_id: "10001"          # 游戏ID
+    # room_num: "1"             # 房间号
+    # game_room: "room-00001"   # 游戏房间标识
+
+    # 可选配置变量
+    gameserver_start_supervisor: false    # 是否自动启动服务
+    gameserver_backup_enabled: true       # 是否启用备份
+    gameserver_backup_count: 5           # 保留备份数量
+
+    # 路径配置（如果默认值不合适，可以在这里覆盖）
+    gameserver_project_root_dir: /usr/local/game-server
+    gameserver_supervisor_user: root
+
+    # 记录部署开始时间
+    gameserver_deploy_start_time: "{{ ansible_date_time.iso8601 }}"
+
+  pre_tasks:
+    - name: 显示部署参数
+      ansible.builtin.debug:
+        msg: |
+          ==================== 部署参数 ====================
+          游戏名称: {{ game_name | default('未设置') }}
+          游戏ID: {{ game_id | default('未设置') }}
+          房间号: {{ room_num | default('未设置') }}
+          游戏房间: {{ game_room | default('未设置') }}
+          目标主机: {{ inventory_hostname }}
+          自动启动: {{ gameserver_start_supervisor }}
+          启用备份: {{ gameserver_backup_enabled }}
+          ================================================
+
+  roles:
+    - role: gameserver
+      tags: 
+        - gameserver
+        - deploy
+
+  post_tasks:
+    - name: 显示部署完成信息
+      ansible.builtin.debug:
+        msg: |
+          ==================== 部署完成 ====================
+          🎉 游戏服务器部署成功！
+
+          快速命令:
+          查看状态: sudo supervisorctl status {{ gameserver_supervisor_program_name | default('gameserver') }}
+          查看日志: sudo tail -f {{ gameserver_host_log_dir | default('/usr/local/game-server/log') }}/
+                   {{ gameserver_supervisor_program_name | default('gameserver') }}-access.log
+          
+          详细信息请查看上面的任务输出。
+          ================================================

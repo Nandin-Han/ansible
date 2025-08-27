@@ -1,0 +1,82 @@
+---
+# 游戏服务器部署专用 Inventory
+all:
+  vars:
+    # 全局SSH配置
+    ansible_user: jms_admin
+    ansible_port: 61254
+    ansible_ssh_private_key_file: ~/.ssh/jms_admin.key
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    
+    # Python 解释器（CentOS 7.9 建议使用 Python 3）
+    ansible_python_interpreter: /opt/rh/rh-python38/root/bin/python3
+
+  children:
+    # 游戏服务器组
+    gameservers:
+      hosts:
+        # 新加坡游戏服务器
+        sg-game-01:
+          ansible_host: 172.31.40.102
+          region: singapore
+          server_id: 1
+        sg-game-02:
+          ansible_host: 172.31.24.81
+          region: singapore
+          server_id: 2
+        sg-game-03:
+          ansible_host: 172.31.37.166
+          region: singapore
+          server_id: 3
+          
+        # 美国游戏服务器
+        us-game-01:
+          ansible_host: 54.193.95.19
+          region: us
+          server_id: 1
+        us-game-02:
+          ansible_host: 52.8.121.171
+          region: us
+          server_id: 2
+          
+        # 预生产服务器
+        pre:
+          ansible_host: 172.31.40.106
+          region: singapore
+          server_id: 0
+          environment: staging
+          
+      vars:
+        # 游戏服务器通用配置
+        service_type: game
+        environment: production
+        
+        # 根据你的实际情况调整这些路径
+        gameserver_project_root_dir: /usr/local/game-server
+        gameserver_supervisor_user: root
+        
+        # 备份配置
+        gameserver_backup_enabled: true
+        gameserver_backup_count: 5
+        
+        # 默认不自动启动（安全起见）
+        gameserver_start_supervisor: false
+
+    # 按地区分组
+    singapore_gameservers:
+      hosts:
+        sg-game-01:
+        sg-game-02:
+        sg-game-03:
+        pre:
+      vars:
+        region: singapore
+        timezone: "Asia/Singapore"
+        
+    us_gameservers:
+      hosts:
+        us-game-01:
+        us-game-02:
+      vars:
+        region: us
+        timezone: "America/Los_Angeles"

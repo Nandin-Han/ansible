@@ -11,7 +11,6 @@
   loop:
     - "{{ gameserver_svn_game_dir }}"
     - "{{ gameserver_svn_bin_dir }}"
-    - "{{ gameserver_project_root_dir }}/{{ game_room }}"
     - "{{ gameserver_host_dir }}"
     - "{{ gameserver_host_log_dir }}"
     - "{{ gameserver_host_backup_dir if gameserver_backup_enabled else omit }}"

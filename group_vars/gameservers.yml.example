@@ -1,0 +1,70 @@
+# Ansible 游戏服务器部署配置示例
+# 复制此文件为 group_vars/gameservers.yml 或 host_vars/hostname.yml 来自定义配置
+
+---
+# ======================
+# 基础路径配置
+# ======================
+gameserver_project_root_dir: /usr/local/game-server
+gameserver_svn_root_url: https://svn.xaisailaiweef1f.com
+gameserver_project_base_dir: server/tongist
+
+# ======================
+# SVN 配置
+# ======================
+# 注意：生产环境中建议将敏感信息放在 ansible-vault 中
+gameserver_svn_user: "your-svn-username"
+gameserver_svn_password: "your-svn-password"
+
+# ======================
+# 编译配置
+# ======================
+gameserver_make_command: "make rebuild"
+
+# ======================
+# Supervisor 配置
+# ======================
+gameserver_supervisor_user: root
+gameserver_supervisor_autostart: true
+gameserver_supervisor_autorestart: true
+gameserver_supervisor_startsecs: 5
+gameserver_supervisor_startretries: 3
+
+# ======================
+# 日志配置
+# ======================
+gameserver_log_max_bytes: 100MB
+gameserver_log_backups: 180
+
+# ======================
+# 备份配置
+# ======================
+gameserver_backup_enabled: true
+gameserver_backup_count: 5
+
+# ======================
+# 权限配置
+# ======================
+gameserver_file_mode: "0644"
+gameserver_dir_mode: "0755"
+gameserver_exec_mode: "0755"
+
+# ======================
+# 服务配置
+# ======================
+gameserver_service_timeout: 30
+gameserver_service_retries: 3
+
+# ======================
+# 自动启动配置（生产环境建议设为 false）
+# ======================
+gameserver_start_supervisor: false
+
+# ======================
+# 主机组映射配置模板
+# ======================
+gameserver_config_templates:
+  singapore: sg-config.xml.j2
+  us: us-config.xml.j2
+  pre: pre-config.xml.j2
+  default: sg-config.xml.j2

@@ -8,5 +8,10 @@
         ],
         "https://raw.githubusercontent.com/ansible/ansible-lint/main/src/ansiblelint/schemas/role-arg-spec.json": "file:///e%3A/Cursor-Edit/ansible/argspec_validation_plays.meta.yml"
     },
-    "ansible.python.interpreterPath": "/Ops/.venv/bin/python"
+    "ansible.python.interpreterPath": "/Ops/.venv/bin/python",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
