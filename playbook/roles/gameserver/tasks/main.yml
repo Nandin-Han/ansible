@@ -44,6 +44,6 @@
 
 - name: SVN 更新任务
   ansible.builtin.include_tasks: svn-update.yml
-  tags: 
+  tags:
     - gameserver_svn
     - svn_update

@@ -39,7 +39,7 @@
 
   roles:
     - role: gameserver
-      tags: 
+      tags:
         - gameserver
         - deploy
 
@@ -54,6 +54,6 @@
           查看状态: sudo supervisorctl status {{ gameserver_supervisor_program_name | default('gameserver') }}
           查看日志: sudo tail -f {{ gameserver_host_log_dir | default('/usr/local/game-server/log') }}/
                    {{ gameserver_supervisor_program_name | default('gameserver') }}-access.log
-          
+
           详细信息请查看上面的任务输出。
           ================================================
